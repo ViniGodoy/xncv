@@ -1,19 +1,17 @@
 #include <iostream>
 #include <xncv\xncv.hpp>
 
-bool bShouldRun = true;
-
 int main(int argc, char* argv[])
 {
 	if (argc == 1)
 	{
-
 		std::cout << "xncv Simple Player" << std::endl;
 		std::cout << "------------------" << std::endl;
 		std::cout << "Usage:" << std::endl;
 		std::cout << "simpleplayer <oni file name>" << std::endl;
 		return 1;
 	}
+
 	try
 	{
 		//Create and starts the video source from a .oni file
@@ -57,7 +55,8 @@ int main(int argc, char* argv[])
 	{
 		std::cout << "Some problems have occurred:" << std::endl;
 		std::cout << e.what() << std::endl;
-
+		return 2;
 	}
+
 	return 0;
 }
