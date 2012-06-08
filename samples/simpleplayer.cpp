@@ -3,6 +3,7 @@
 
 int main(int argc, char* argv[])
 {
+	//Wrong usage test
 	if (argc == 1)
 	{
 		std::cout << "xncv Simple Player" << std::endl;
@@ -35,11 +36,14 @@ int main(int argc, char* argv[])
 			cv::imshow("Video", video);
 
 			//Reads the depth map and calculates it's histogram distributed image
-			cv::Mat dm = source.captureDepth(true); //Depth map as a ushort Mat.
+			cv::Mat dm = source.captureDepth(); //Depth map as a ushort Mat.
 			cv::Mat hist = source.calcDepthHist();  //Depth map histogram
 			cv::Mat histImg = dm = xncv::cvtDepthTo8UHist(dm, hist);
 			cv::imshow("Depth", histImg);
 
+			//Waits for user input
+			//ESC - Leave application
+			//R - Records current frame.
 			char key = cv::waitKey(1);
 			if (key == 27)
 				running = false;
@@ -53,6 +57,7 @@ int main(int argc, char* argv[])
 	}
 	catch (xncv::Exception& e)
 	{
+		//Show error and leave
 		std::cout << "Some problems have occurred:" << std::endl;
 		std::cout << e.what() << std::endl;
 		return 2;
