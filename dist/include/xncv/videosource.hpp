@@ -1,3 +1,16 @@
+/******************************************************************************
+*
+* COPYRIGHT Vinícius G. Mendonça ALL RIGHTS RESERVED.
+*
+* This software cannot be copied, stored, distributed without
+* Vinícius G.Mendonça prior authorization.
+*
+* This file was made available on https://github.com/ViniGodoy/xncv and it
+* is free to be restributed or used under Creative Commons license 2.5 br:
+* http://creativecommons.org/licenses/by-sa/2.5/br/
+*
+*******************************************************************************/
+
 #if !defined(__VIDEOSOURCE_HPP__)
 #define __VIDEOSOURCE_HPP__
 
@@ -17,13 +30,25 @@ namespace xncv
 			bool isFile;
 
 			void init(const std::string& file);
+			void seek(XnInt32 frame, XnPlayerSeekOrigin origin);
+
 		public:
 			VideoSource();
 			VideoSource(const std::string& file);
 
+			//Display commands
 			void start();
-			void stop();
 			void update();
+			void stop();
+
+			//Navigation commands			
+			void first();
+			void jump(int frames);
+			void goTo(int frame);
+			void last();
+
+			int currentFrame() const;
+			int size() const;
 
 			cv::Mat captureBGR(bool clone=false) const;
 			cv::Mat captureDepth(bool clone=false) const;
@@ -37,7 +62,9 @@ namespace xncv
 			xn::Context& getXnContext() { return context; }
 			xn::Player& getXnPlayer() { return player; }
 			xn::ImageGenerator& getXnImageGenerator() { return imgGen; }
-			xn::DepthGenerator& getXnDepthGenerator() { return depthGen; }			
+			xn::DepthGenerator& getXnDepthGenerator() { return depthGen; }		
+
+			~VideoSource();
 	};
 }
 #endif
