@@ -40,10 +40,9 @@ xncv::VideoSource::VideoSource()
 	init("");
 }
 
-xncv::VideoSource::VideoSource(const std::string& file, bool repeat)
+xncv::VideoSource::VideoSource(const std::string& file)
 {
 	init(file);
-	setRepeat(repeat);
 }
 
 void xncv::VideoSource::start()
