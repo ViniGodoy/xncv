@@ -20,9 +20,13 @@ namespace xncv
 {
 	class Exception : public std::logic_error
 	{
+		private:
+			XnStatus status;
+
 		public:
-			Exception(const char* what) : logic_error(what) {}
-			Exception(const std::string& what) : logic_error(what) {}			
+            Exception(const char* what, int _status=XN_STATUS_OK) : logic_error(what), status(_status) {}
+            Exception(const std::string& what, int _status=XN_STATUS_OK) : logic_error(what), status(_status) {}
+			XnStatus getStatus() { return status; }
 	};
 
 	class UnableToOpenFileException : public Exception
@@ -46,6 +50,24 @@ namespace xncv
 		public:
 			GeneratorError(const char* what) : Exception(what) {}
 			GeneratorError(const std::string& what) : Exception(what) {}
+	};
+
+	class VideoSourceException : public Exception
+	{
+		public:
+			VideoSourceException(const char* what, XnStatus status=XN_STATUS_OK) : Exception(what, status) {}
+			VideoSourceException(const std::string& what, XnStatus status=XN_STATUS_OK) : Exception(what, status) {}
+	};
+
+	class FrameSkipException : public VideoSourceException
+	{
+		private:
+			int frame;					
+
+		public:
+            FrameSkipException(const char* what, int frameNumber, int status) : VideoSourceException(what, status), frame(frameNumber) {}
+            FrameSkipException(const std::string& what, int frameNumber, int status) : VideoSourceException(what, status), frame(frameNumber) {}
+			int getFrame() { return frame; }
 	};
 }
 

@@ -40,24 +40,28 @@ xncv::VideoSource::VideoSource()
 	init("");
 }
 
-xncv::VideoSource::VideoSource(const std::string& file)
+xncv::VideoSource::VideoSource(const std::string& file, bool repeat)
 {
 	init(file);
+	setRepeat(repeat);
 }
 
 void xncv::VideoSource::start()
 {
-	if (context.StartGeneratingAll() != XN_STATUS_OK) throw new GeneratorError("Unable to start generating data!");
+	if (context.StartGeneratingAll() != XN_STATUS_OK)
+		throw new GeneratorError("Unable to start generating data!");
 }
 
 void xncv::VideoSource::stop()
 {
-	if (context.StopGeneratingAll() != XN_STATUS_OK) throw new GeneratorError("Unable to stop generating data!");
+	if (context.StopGeneratingAll() != XN_STATUS_OK && !isFile)
+		throw new GeneratorError("Unable to stop generating data!");
 }
 
 void xncv::VideoSource::update()
 {
-	if (context.WaitAndUpdateAll() != XN_STATUS_OK) throw new GeneratorError("Unable to update data from generators!");
+	if (context.WaitAndUpdateAll() != XN_STATUS_OK)
+		throw new GeneratorError("Unable to update data from generators!");
 }
 
 cv::Mat xncv::VideoSource::captureBGR(bool clone) const
@@ -89,4 +93,75 @@ XnPoint3D xncv::VideoSource::projectiveToWorld(const cv::Point& point, XnFloat z
 {
 	if (z < 0.0f) z = captureDepth().ptr<ushort>(point.y)[point.x];
 	return xncv::projectiveToWorld(point, z, depthGen);
+}
+
+void xncv::VideoSource::seek(XnInt32 frame, XnPlayerSeekOrigin origin)
+{
+	//Command is ignored for the input device.
+	if (!isFile)
+		return;
+
+	if (imgGen.IsValid())
+	{
+		int status = player.SeekToFrame(imgGen.GetName(), frame, origin) != XN_STATUS_OK;
+		if (status != XN_STATUS_OK)
+		{
+			if (origin == XN_PLAYER_SEEK_SET)
+				throw xncv::FrameSkipException("Unable to seek image to frame", frame, status);
+			else
+				throw xncv::FrameSkipException("Unable to jump image to frame", frame, status);
+		}
+	}
+}
+
+void xncv::VideoSource::first()
+{
+	seek(0, XN_PLAYER_SEEK_SET);
+}
+
+void xncv::VideoSource::jump(int frames)
+{
+	seek(frames, XN_PLAYER_SEEK_CUR);
+}
+
+void xncv::VideoSource::goTo(int frame)
+{
+	seek(frame, XN_PLAYER_SEEK_SET);
+}
+
+void xncv::VideoSource::last()
+{
+	seek(size(), XN_PLAYER_SEEK_SET);
+}
+
+int xncv::VideoSource::currentFrame() const
+{
+	if (!isFile)
+		return -1;
+
+	XnUInt32 nFrame = 0;
+	XnStatus nRetVal = player.TellFrame(imgGen.GetName(), nFrame);
+	if (nRetVal != XN_STATUS_OK)
+		throw new xncv::VideoSourceException("Unable to read the current frame");
+	return static_cast<int>(nFrame);
+}
+
+int xncv::VideoSource::size() const
+{
+	if (!isFile)
+		return -1;
+
+	XnUInt32 nFrames = 0;
+	XnStatus nRetVal = player.GetNumFrames(imgGen.GetName(), nFrames);
+	if (nRetVal != XN_STATUS_OK)
+		throw new xncv::VideoSourceException("Unable to read the number of frames");
+
+	return static_cast<int>(nFrames);
+}
+
+xncv::VideoSource::~VideoSource()
+{
+	imgGen.Release();
+	depthGen.Release();
+	player.Release();
 }

@@ -30,13 +30,25 @@ namespace xncv
 			bool isFile;
 
 			void init(const std::string& file);
+			void seek(XnInt32 frame, XnPlayerSeekOrigin origin);
+
 		public:
 			VideoSource();
-			VideoSource(const std::string& file);
+			VideoSource(const std::string& file, bool repeat=true);
 
+			//Display commands
 			void start();
-			void stop();
 			void update();
+			void stop();
+
+			//Navigation commands			
+			void first();
+			void jump(int frames);
+			void goTo(int frame);
+			void last();
+
+			int currentFrame() const;
+			int size() const;
 
 			cv::Mat captureBGR(bool clone=false) const;
 			cv::Mat captureDepth(bool clone=false) const;
@@ -50,7 +62,9 @@ namespace xncv
 			xn::Context& getXnContext() { return context; }
 			xn::Player& getXnPlayer() { return player; }
 			xn::ImageGenerator& getXnImageGenerator() { return imgGen; }
-			xn::DepthGenerator& getXnDepthGenerator() { return depthGen; }			
+			xn::DepthGenerator& getXnDepthGenerator() { return depthGen; }		
+
+			~VideoSource();
 	};
 }
 #endif
