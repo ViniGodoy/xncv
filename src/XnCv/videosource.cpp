@@ -1,3 +1,16 @@
+/******************************************************************************
+*
+* COPYRIGHT Vinícius G. Mendonça ALL RIGHTS RESERVED.
+*
+* This software cannot be copied, stored, distributed without
+* Vinícius G.Mendonça prior authorization.
+*
+* This file was made available on https://github.com/ViniGodoy/xncv and it
+* is free to be restributed or used under Creative Commons license 2.5 br:
+* http://creativecommons.org/licenses/by-sa/2.5/br/
+*
+*******************************************************************************/
+
 #include "VideoSource.hpp"
 #include "functions.hpp"
 #include "exceptions.hpp"
@@ -7,13 +20,13 @@ void xncv::VideoSource::init(const std::string& file)
 	isFile = !file.empty();
 	if (context.Init() != XN_STATUS_OK) throw std::runtime_error("Unable to init context");
 
-	if (isFile) 
+	if (isFile)
 	{
-		if (context.OpenFileRecording(file.c_str(), player) != XN_STATUS_OK) 
+		if (context.OpenFileRecording(file.c_str(), player) != XN_STATUS_OK)
 			throw UnableToOpenFileException(file);
 		if (context.FindExistingNode(XN_NODE_TYPE_IMAGE, imgGen) != XN_STATUS_OK)
 			throw UnableToInitGenerator("Unable to init image generator.");
-		if (context.FindExistingNode(XN_NODE_TYPE_DEPTH, depthGen) != XN_STATUS_OK) 
+		if (context.FindExistingNode(XN_NODE_TYPE_DEPTH, depthGen) != XN_STATUS_OK)
 			throw UnableToInitGenerator("Unable to depth generator.");
 		return;
 	}
@@ -22,12 +35,12 @@ void xncv::VideoSource::init(const std::string& file)
 	if (depthGen.Create(context) != XN_STATUS_OK) throw UnableToInitGenerator("Unable to depth generator.");
 }
 
-xncv::VideoSource::VideoSource() 
+xncv::VideoSource::VideoSource()
 {
 	init("");
 }
 
-xncv::VideoSource::VideoSource(const std::string& file) 
+xncv::VideoSource::VideoSource(const std::string& file)
 {
 	init(file);
 }

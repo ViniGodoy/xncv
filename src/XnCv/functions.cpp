@@ -1,3 +1,16 @@
+/******************************************************************************
+*
+* COPYRIGHT Vinícius G. Mendonça ALL RIGHTS RESERVED.
+*
+* This software cannot be copied, stored, distributed without
+* Vinícius G.Mendonça prior authorization.
+*
+* This file was made available on https://github.com/ViniGodoy/xncv and it
+* is free to be restributed or used under Creative Commons license 2.5 br:
+* http://creativecommons.org/licenses/by-sa/2.5/br/
+*
+*******************************************************************************/
+
 #include "functions.hpp"
 #include <opencv2\imgproc\imgproc.hpp>
 
@@ -46,30 +59,30 @@ cv::Mat xncv::cvtDepthTo8UDist(const cv::Mat &mat, int zRes)
 }
 
 cv::Mat xncv::cvtDepthTo8UHist(const cv::Mat &mat, const cv::Mat& histogram)
-{	
+{
 	cv::Mat result(mat.rows, mat.cols, CV_8U);
 
 	//If the histogram is empty, returns an empty image
 	if (histogram.empty())
 		return result;
-	
-	//Calculate the accumulated histogram	
+
+	//Calculate the accumulated histogram
 	cv::Mat accum = histogram.clone();
 	accum.ptr<float>(0)[0] = 0;
 	for (int i = 1; i < accum.rows; ++i)
-		accum.ptr<float>(i)[0] += accum.ptr<float>(i-1)[0]; 
+		accum.ptr<float>(i)[0] += accum.ptr<float>(i-1)[0];
 
 	//If there's only black pixels, return an empty image
 	float count = accum.ptr<float>(accum.rows-1)[0];
 	if (count == 0)
 		return result;
-	
+
 	//Scale to 0..255 range
 	forEach<float>(accum, [count](const cv::Point& p, float& elem) {
 		elem = 256.0f * (1.0f - elem / count);
 	});
-				
-	//Create the final image	
+
+	//Create the final image
 	forEach<uchar>(result, [&accum, mat](const cv::Point& p, uchar& elem)
 	{
 		const float &depth = mat.ptr<ushort>(p.y)[p.x];
@@ -105,13 +118,13 @@ cv::Mat xncv::histogramImage(const cv::Mat& histogram, ushort height, bool cropR
 	if (cropLeft) while (histogram.ptr<float>(firstCol)[0] == 0) ++firstCol;
 	int cols = lastCol-firstCol;
 
-	cv::Mat histImg = cv::Mat(height, cols, CV_8U, cv::Scalar(255));	
+	cv::Mat histImg = cv::Mat(height, cols, CV_8U, cv::Scalar(255));
 
-	for (int h = 0; h < cols; h++) 
-	{						
+	for (int h = 0; h < cols; h++)
+	{
 		float bin = histogram.ptr<float>(h+firstCol)[0];
-		int intensity = static_cast<int>(bin*(height*0.99-1)/max);		
-		cv::line(histImg, 
+		int intensity = static_cast<int>(bin*(height*0.99-1)/max);
+		cv::line(histImg,
 			cv::Point(h, height),
 			cv::Point(h, height-intensity),
 			cv::Scalar::all(0));
@@ -138,7 +151,7 @@ XnPoint3D xncv::projectiveToWorld(const cv::Point& point, XnFloat z, const xn::D
 	return p2;
 }
 
-std::ostream& xncv::operator<<(std::ostream& output, const XnVector3D& p) 
+std::ostream& xncv::operator<<(std::ostream& output, const XnVector3D& p)
 {
     return (output << "[" <<  p.X << ", " << p.Y <<", " << p.Z << "]");
 }

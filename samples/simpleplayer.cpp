@@ -1,6 +1,22 @@
+/******************************************************************************
+*
+* COPYRIGHT Vinícius G. Mendonça ALL RIGHTS RESERVED.
+*
+* This software cannot be copied, stored, distributed without
+* Vinícius G.Mendonça prior authorization.
+*
+* This file was made available on https://github.com/ViniGodoy/xncv and it
+* is free to be restributed or used under Creative Commons license 2.5 br:
+* http://creativecommons.org/licenses/by-sa/2.5/br/
+*
+*******************************************************************************/
+
 #include <iostream>
 #include <xncv\xncv.hpp>
 
+/**
+ * This tutorial shows how to control .oni video exhibition
+ */
 int main(int argc, char* argv[])
 {
 	//Wrong usage test
@@ -16,8 +32,8 @@ int main(int argc, char* argv[])
 	try
 	{
 		//Create and starts the video source from a .oni file
-		//To read from kinect do not provide a filename (you may also provide a
-		//NULL or "" filename).
+		//To read from the input hardware do not provide a filename (you may
+		//also provide a blank ("") filename).
 		xncv::VideoSource source(argv[1]);
 		source.start();
 
