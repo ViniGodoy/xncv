@@ -69,6 +69,22 @@ namespace xncv
             FrameSkipException(const std::string& what, int frameNumber, int status) : VideoSourceException(what, status), frame(frameNumber) {}
 			int getFrame() { return frame; }
 	};
+
+	class NoCapabilityException : public Exception
+	{
+		public:
+			NoCapabilityException(const char* what, XnStatus status=XN_STATUS_OK) : Exception(what, status) {}
+			NoCapabilityException(const std::string& what, XnStatus status=XN_STATUS_OK) : Exception(what, status) {}
+	};
+
+	class UserNotFoundException : public Exception
+	{
+		private:
+			XnUserID id;
+		public:
+			UserNotFoundException(XnUserID _id) : id(_id), Exception("User not found") {}			
+			XnUserID getId() { return id; }
+	};
 }
 
 #endif
