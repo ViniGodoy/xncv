@@ -45,6 +45,11 @@ xncv::VideoSource::VideoSource(const std::string& file)
 	init(file);
 }
 
+bool xncv::VideoSource::fromFile() const
+{
+	return isFile;
+}
+
 void xncv::VideoSource::start()
 {
 	if (context.StartGeneratingAll() != XN_STATUS_OK)

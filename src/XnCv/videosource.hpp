@@ -35,6 +35,8 @@ namespace xncv
 		public:
 			VideoSource();
 			VideoSource(const std::string& file);
+			
+			bool fromFile() const;
 
 			//Display commands
 			void start();

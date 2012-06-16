@@ -22,5 +22,6 @@
 #include "functions.hpp"
 #include "exceptions.hpp"
 #include "videosource.hpp"
+#include "usertracker.hpp"
 
 #endif
