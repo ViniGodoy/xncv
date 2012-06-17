@@ -14,4 +14,5 @@ Dependencies
 
 History
 =======
+16/06/2012 - Added skeleton generation and drawing support
 08/06/2012 - Project created
