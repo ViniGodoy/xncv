@@ -21,6 +21,9 @@ int main(int argc, char* argv[])
 {
 	try
 	{
+		//Test if should draw only the closest user
+		bool closest = argc == 2 && strcmp(argv[1], "-closest");
+
 		//Create and starts the video source from a .oni file
 		//To read from the input hardware do not provide a filename (you may
 		//also provide a blank ("") filename).
@@ -45,20 +48,14 @@ int main(int argc, char* argv[])
 			cv::Mat histImg = dm = xncv::cvtDepthTo8UHist(dm, hist);
 
 			//Draws the skeleton over histImg
-			std::vector<xncv::User> users = tracker.getUsers();
+			std::vector<xncv::User> users =
+				closest ? xncv::filterClosest(tracker.getUsers()) : tracker.getUsers();
+
 			for (unsigned i = 0; i < users.size(); ++i)
 			{
 				//If already tracking user, draws it.
-				if (users[i].isTracking())
-				{
-					std::vector<xncv::Limb> limbs = users[i].getLimbs(source.getXnDepthGenerator());
-					xncv::drawLimbs(limbs, histImg);
-				}
-				else
-				{
-					//Otherwise, it's a new user. Track him.
-					users[i].setTracking();
-				}
+				std::vector<xncv::Limb> limbs = users[i].getLimbs(source.getXnDepthGenerator());
+				xncv::drawLimbs(limbs, histImg);
 			}
 
 			cv::imshow("Depth", histImg);

@@ -1,3 +1,16 @@
+/******************************************************************************
+*
+* COPYRIGHT Vinícius G. Mendonça ALL RIGHTS RESERVED.
+*
+* This software cannot be copied, stored, distributed without
+* Vinícius G.Mendonça prior authorization.
+*
+* This file was made available on https://github.com/ViniGodoy/xncv and it
+* is free to be restributed or used under Creative Commons license 2.5 br:
+* http://creativecommons.org/licenses/by-sa/2.5/br/
+*
+*******************************************************************************/
+
 #include "user.hpp"
 
 xncv::User::User(XnUserID userId, xn::UserGenerator* generator)
@@ -63,10 +76,14 @@ bool xncv::User::getJoint(XnSkeletonJoint type, XnSkeletonJointTransformation& t
 
 std::map<XnSkeletonJoint, XnSkeletonJointTransformation> xncv::User::getJoints() const
 {
+	std::map<XnSkeletonJoint, XnSkeletonJointTransformation> jointMap;
+	if (isTracking())
+		return jointMap;
+
 	XnSkeletonJoint joints[25];
 	XnUInt16 numJoints = 25;
 	userGen->GetSkeletonCap().EnumerateActiveJoints(joints, numJoints);
-	std::map<XnSkeletonJoint, XnSkeletonJointTransformation> jointMap;
+
 	for (int i = 0; i < numJoints; ++i)
 	{
 		XnSkeletonJointTransformation joint;
@@ -122,4 +139,11 @@ std::vector<xncv::Limb> xncv::User::getLimbs(const xn::DepthGenerator& depthGen)
     }
 
     return limbs;
+}
+
+XnVector3D xncv::User::getCenterOfMass() const
+{
+	XnPoint3D center = {0.0f, 0.0f, 0.0f};
+	userGen->GetCoM(id, center);
+	return center;
 }

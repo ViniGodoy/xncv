@@ -24,6 +24,9 @@ namespace xncv
 		private:			
 			xn::UserGenerator userGen;
 
+			XnCallbackHandle calibrationHandler;
+			XnCallbackHandle userHandler;
+
 		public:
 			UserTracker(VideoSource& source, XnSkeletonProfile profile=XN_SKEL_PROFILE_ALL);
 			~UserTracker();
@@ -41,5 +44,6 @@ namespace xncv
 	};
 
 	void drawLimbs(const std::vector<xncv::Limb>& limbs, cv::Mat& image, float confidenceThreshold=0.5f);
+	std::vector<xncv::User> filterClosest(const std::vector<xncv::User>& users);
 }
 #endif 

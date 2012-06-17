@@ -60,6 +60,7 @@ namespace xncv
 			bool getJoint(XnSkeletonJoint type, XnSkeletonJointTransformation& transform) const;
 			std::map<XnSkeletonJoint, XnSkeletonJointTransformation> getJoints() const;
 			std::vector<Limb> getLimbs(const xn::DepthGenerator& depthGen) const;
+			XnVector3D getCenterOfMass() const;
 	};
 }
 #endif
