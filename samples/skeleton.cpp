@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 		xncv::VideoSource source;
 
 		//Associate an user tracker to this video source.
-		xncv::UserTracker tracker(source, XN_SKEL_PROFILE_UPPER);
+		xncv::UserTracker tracker(source);
 
 		source.start();
 
