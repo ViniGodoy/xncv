@@ -71,22 +71,6 @@ xncv::UserTracker::~UserTracker()
 	userGen.Release();
 }
 
-bool xncv::UserTracker::isCalibrationPoseRequired() const
-{
-	return userGen.GetSkeletonCap().NeedPoseForCalibration() == TRUE;
-}
-
-string xncv::UserTracker::getCalibrationPose() const
-{
-	XnChar calibrationPose[20];
-
-	string pose;
-	if (userGen.GetSkeletonCap().GetCalibrationPose(calibrationPose) == XN_STATUS_OK)
-		pose.assign(calibrationPose);
-
-	return pose;
-}
-
 std::vector<XnSkeletonJoint> xncv::UserTracker::getActiveJoints() const
 {
 	XnSkeletonJoint joints[25];

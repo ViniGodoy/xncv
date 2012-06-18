@@ -31,9 +31,6 @@ namespace xncv
 			UserTracker(VideoSource& source, XnSkeletonProfile profile=XN_SKEL_PROFILE_ALL);
 			~UserTracker();
 
-			bool isCalibrationPoseRequired() const;
-			std::string getCalibrationPose() const;
-
 			std::vector<XnSkeletonJoint> getActiveJoints() const;
 			bool setJointActive(XnSkeletonJoint joint, bool active=true);
 			bool setProfile(XnSkeletonProfile profile);
