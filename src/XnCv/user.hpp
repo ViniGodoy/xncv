@@ -33,7 +33,7 @@ namespace xncv
 		JointInfo joint1;
 		JointInfo joint2;
 		XnConfidence confidence;
-	};
+	};	
 
 	class User
 	{
