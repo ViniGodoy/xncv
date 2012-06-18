@@ -166,6 +166,9 @@ void xncv::SkeletonWriter::open(const std::string& fileName)
 
 void xncv::SkeletonWriter::operator<<(const User& user)
 {
+	if (!user.isTracking() || user.isCalibrating())
+		return;
+
 	writer << frame;
 	writer << user.getId();
 	auto joints = user.getJoints();
