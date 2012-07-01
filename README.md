@@ -14,5 +14,8 @@ Dependencies
 
 History
 =======
+01/07/2012 - Added .oni recording 
+18/06/2012 - Added skeleton recording classes
+17/06/2012 - Improved calibration process and added auto tracking activation
 16/06/2012 - Added skeleton generation and drawing support
 08/06/2012 - Project created

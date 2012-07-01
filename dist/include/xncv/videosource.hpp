@@ -18,8 +18,12 @@
 #include <opencv2\opencv.hpp>
 #include <XnCppWrapper.h>
 
+
 namespace xncv
 {
+	enum DepthCompression {DEPTH_DONT_CAPTURE, DEPTH_NONE, DEPTH_EMB_TABLES_16Z};
+	enum ImageCompression {IMG_DONT_CAPTURE, IMG_NONE, IMG_JPEG};
+
 	class VideoSource
 	{
 		private:
@@ -27,11 +31,15 @@ namespace xncv
 			xn::Context context;		
 			xn::ImageGenerator imgGen;
 			xn::DepthGenerator depthGen;
+			xn::Recorder* recorder;
+
 			bool isFile;
 
 			void init(const std::string& file);
 			void seek(XnInt32 frame, XnPlayerSeekOrigin origin);
 
+			std::string fixFileName(const std::string fileName);
+			void createRecorder(const std::string& fileName);
 		public:
 			VideoSource();
 			VideoSource(const std::string& file);
@@ -65,6 +73,12 @@ namespace xncv
 			xn::Player& getXnPlayer() { return player; }
 			xn::ImageGenerator& getXnImageGenerator() { return imgGen; }
 			xn::DepthGenerator& getXnDepthGenerator() { return depthGen; }		
+			
+			bool startRecording(const std::string& filename, 
+				ImageCompression imageCompression=IMG_JPEG, DepthCompression 
+				depthCompression = DEPTH_EMB_TABLES_16Z);
+			void stopRecording();
+			bool isRecording() const;
 
 			~VideoSource();
 	};

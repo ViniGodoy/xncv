@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 		//Create and starts the video source from a .oni file
 		//To read from the input hardware do not provide a filename (you may
 		//also provide a blank ("") filename).
-		xncv::VideoSource source(argv[1]);
+		xncv::VideoSource source;
 		source.start();
 
 		cv::namedWindow("Video");
@@ -47,8 +47,15 @@ int main(int argc, char* argv[])
 			source.update();
 
 			//Reads and displays the RGB image. Notice that the image is converted
-			//to BGR, since it's opencv default format.
-			cv::Mat video = source.captureBGR();
+			//to BGR, since it's opencv default format. The true parameter indicates
+			//that we want a copy of the source image, not just a pointer to it.			
+			cv::Mat video = source.captureBGR(true);
+
+			//Draws the red filled circle indicating that the video is recording			
+			if (source.isRecording())
+				cv::circle(video, cv::Point(600,15), 8, cv::Scalar(0,0,255,255), -1);
+
+			//Shows the image
 			cv::imshow("Video", video);
 
 			//Reads the depth map and calculates it's histogram distributed image
@@ -59,15 +66,23 @@ int main(int argc, char* argv[])
 
 			//Waits for user input
 			//ESC - Leave application
-			//R - Records current frame.
+			//P - Prints current frame.
+			//R - Start/stop recording
 			char key = cv::waitKey(1);
 			if (key == 27)
 				running = false;
-			else if (key == 'r' || key == 'R')
+			else if (key == 'p' || key == 'P')
 			{
 				cv::imwrite("video.jpg", source.captureBGR());
 				cv::imwrite("depth.jpg", dm);
 				cv::waitKey(500);
+			}
+			else if (!source.fromFile() && (key == 'r' || key == 'R'))
+			{				
+				if (source.isRecording())
+					source.stopRecording();
+				else
+					source.startRecording("recordSample");
 			}
 		}
 	}
