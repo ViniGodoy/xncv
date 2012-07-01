@@ -19,22 +19,17 @@
  */
 int main(int argc, char* argv[])
 {
-	//Wrong usage test
-	if (argc == 1)
-	{
-		std::cout << "xncv Simple Player" << std::endl;
-		std::cout << "------------------" << std::endl;
-		std::cout << "Usage:" << std::endl;
-		std::cout << "simpleplayer <oni file name>" << std::endl;
-		return 1;
-	}
+	std::string filename;
+
+	if (argc > 1)
+		filename = argv[1];
 
 	try
 	{
 		//Create and starts the video source from a .oni file
 		//To read from the input hardware do not provide a filename (you may
 		//also provide a blank ("") filename).
-		xncv::VideoSource source;
+		xncv::VideoSource source(filename);
 		source.start();
 
 		cv::namedWindow("Video");
@@ -82,6 +77,8 @@ int main(int argc, char* argv[])
 				if (source.isRecording())
 					source.stopRecording();
 				else
+					//Starts recording. This will only work if it's not 
+					//a file being played.
 					source.startRecording("recordSample");
 			}
 		}
