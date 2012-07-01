@@ -15,21 +15,14 @@
 #include <xncv\xncv.hpp>
 
 /**
- * This tutorial shows how to control .oni video exhibition
+ * This tutorial shows how to play and record .oni video files.
  */
 int main(int argc, char* argv[])
 {
-	std::string filename;
-
-	if (argc > 1)
-		filename = argv[1];
-
 	try
 	{
-		//Create and starts the video source from a .oni file
-		//To read from the input hardware do not provide a filename (you may
-		//also provide a blank ("") filename).
-		xncv::VideoSource source(filename);
+		//Create and starts the video source
+		xncv::VideoSource source(argc == 1 ? "" : argv[1]);
 		source.start();
 
 		cv::namedWindow("Video");
@@ -53,7 +46,7 @@ int main(int argc, char* argv[])
 			//Shows the image
 			cv::imshow("Video", video);
 
-			//Reads the depth map and calculates it's histogram distributed image
+			//Reads the depth map and calculate it's histogram distributed image
 			cv::Mat dm = source.captureDepth(); //Depth map as a ushort Mat.
 			cv::Mat hist = source.calcDepthHist();  //Depth map histogram
 			cv::Mat histImg = dm = xncv::cvtDepthTo8UHist(dm, hist);
