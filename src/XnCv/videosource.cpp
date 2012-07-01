@@ -17,6 +17,7 @@
 
 void xncv::VideoSource::init(const std::string& file)
 {
+	recorder = nullptr;
 	isFile = !file.empty();
 	if (context.Init() != XN_STATUS_OK) throw std::runtime_error("Unable to init context");
 
@@ -165,7 +166,88 @@ int xncv::VideoSource::size() const
 
 xncv::VideoSource::~VideoSource()
 {
+	stopRecording();
 	imgGen.Release();
 	depthGen.Release();
 	player.Release();
+}
+
+void xncv::VideoSource::createRecorder(const std::string& fileName)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+	xn::NodeInfoList recordersList;
+	nRetVal = context.EnumerateProductionTrees(XN_NODE_TYPE_RECORDER, NULL, recordersList);
+	if (nRetVal != XN_STATUS_OK)
+		throw new xncv::VideoSourceException("Unable to find Recorder production node!", nRetVal);
+
+	// take first
+	xn::NodeInfo chosen = *recordersList.Begin();
+
+	recorder = new xn::Recorder();
+
+	nRetVal = context.CreateProductionTree(chosen, *recorder);
+	if (nRetVal != XN_STATUS_OK)
+	{
+		stopRecording();
+		throw new xncv::VideoSourceException("Unable create the production tree!", nRetVal);		
+	}
+
+	nRetVal = recorder->SetDestination(XN_RECORD_MEDIUM_FILE, fileName.c_str());
+	if (nRetVal != XN_STATUS_OK)
+	{
+		stopRecording();
+		throw new xncv::VideoSourceException("Unable create recording file!", nRetVal);		
+	}	
+}
+
+std::string xncv::VideoSource::fixFileName(const std::string fileName)
+{
+	std::string file;
+	std::string::size_type idx = fileName.rfind(".");	
+	if (idx == std::string::npos) //any extension
+		file = fileName + ".oni";
+	else if (fileName.substr(idx) == ".") //ends with .
+		file = fileName + "oni";
+	else if (fileName.substr(idx+1) != "oni") //does not have oni extension
+		file = fileName + ".oni";
+	else if (fileName.substr(idx) == ".oni") //ends with .oni
+		file = fileName;
+	return file;
+}
+
+bool xncv::VideoSource::startRecording(const std::string& fileName, 
+	ImageCompression imageCompression, DepthCompression depthCompression)
+{
+	if (isFile)
+		return false;
+
+	if (isRecording())
+		stopRecording();
+
+
+	createRecorder(fixFileName(fileName));		
+	if (imageCompression != IMG_DONT_CAPTURE)
+		recorder->AddNodeToRecording(imgGen, imageCompression == IMG_NONE ?
+			XN_CODEC_UNCOMPRESSED : XN_CODEC_JPEG);	
+
+	if (depthCompression != DEPTH_DONT_CAPTURE)
+		recorder->AddNodeToRecording(depthGen, depthCompression == DEPTH_NONE ?
+		XN_CODEC_UNCOMPRESSED : XN_CODEC_16Z_EMB_TABLES);	
+
+	return true;
+}
+
+void xncv::VideoSource::stopRecording()
+{
+	if (!recorder)
+		return;
+
+	recorder->Release();
+	delete recorder;
+	recorder = nullptr;
+}
+
+bool xncv::VideoSource::isRecording() const
+{
+	return recorder != nullptr;
 }
