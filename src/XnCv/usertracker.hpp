@@ -40,7 +40,7 @@ namespace xncv
 			std::vector<User> getUsers();
 	};
 
-	void drawLimbs(const std::vector<xncv::Limb>& limbs, cv::Mat& image, float confidenceThreshold=0.5f);
+	void drawLimbs(cv::Mat& image, const std::vector<xncv::Limb>& limbs, float confidenceThreshold=0.5f, unsigned char color=0);
 	std::vector<xncv::User> filterClosest(const std::vector<xncv::User>& users);
 }
 #endif 

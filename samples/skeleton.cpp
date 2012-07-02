@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 			{
 				//If already tracking user, draws it.
 				std::vector<xncv::Limb> limbs = users[i].getLimbs(source.getXnDepthGenerator());
-				xncv::drawLimbs(limbs, histImg);
+				xncv::drawLimbs(histImg, limbs);
 			}
 
 			cv::imshow("Depth", histImg);

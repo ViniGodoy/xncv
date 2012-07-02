@@ -123,15 +123,15 @@ vector<xncv::User> xncv::UserTracker::getUsers()
 	return users;
 }
 
-void xncv::drawLimbs(const vector<xncv::Limb>& limbs, cv::Mat& image, float confidenceThreshold)
+void xncv::drawLimbs(cv::Mat& image, const vector<xncv::Limb>& limbs, float confidenceThreshold, unsigned char color)
 {
-	std::for_each(limbs.begin(), limbs.end(), [&image, confidenceThreshold](const xncv::Limb& limb)
+	std::for_each(limbs.begin(), limbs.end(), [&image, confidenceThreshold, color](const xncv::Limb& limb)
 	{
 		cv::line(image, limb.joint1.pos, limb.joint2.pos,
-			cv::Scalar::all(0),
+			cv::Scalar::all(color), 
 			limb.confidence < confidenceThreshold ? 1 : 2);
-		cv::circle(image, limb.joint1.pos, 3, cv::Scalar::all(0), -1);
-		cv::circle(image, limb.joint2.pos, 3, cv::Scalar::all(0), -1);
+		cv::circle(image, limb.joint1.pos, 3, cv::Scalar::all(color), -1);
+		cv::circle(image, limb.joint2.pos, 3, cv::Scalar::all(color), -1);
 	});
 }
 
