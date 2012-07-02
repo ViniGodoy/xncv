@@ -77,7 +77,7 @@ bool xncv::User::getJoint(XnSkeletonJoint type, XnSkeletonJointTransformation& t
 std::map<XnSkeletonJoint, XnSkeletonJointTransformation> xncv::User::getJoints() const
 {
 	std::map<XnSkeletonJoint, XnSkeletonJointTransformation> jointMap;
-	if (isTracking())
+	if (!isTracking())
 		return jointMap;
 
 	XnSkeletonJoint joints[25];

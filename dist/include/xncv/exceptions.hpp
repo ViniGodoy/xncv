@@ -85,6 +85,15 @@ namespace xncv
 			UserNotFoundException(XnUserID _id) : id(_id), Exception("User not found") {}			
 			XnUserID getId() { return id; }
 	};
+
+	class IOException : public Exception
+	{
+		private:
+			std::string filename;
+		public:
+			IOException(const std::string& what, const std::string& file) : filename(file), Exception(what) {}			
+			const std::string& getFilename() { return filename; }
+	};
 }
 
 #endif

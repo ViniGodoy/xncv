@@ -31,9 +31,6 @@ namespace xncv
 			UserTracker(VideoSource& source, XnSkeletonProfile profile=XN_SKEL_PROFILE_ALL);
 			~UserTracker();
 
-			bool isCalibrationPoseRequired() const;
-			std::string getCalibrationPose() const;
-
 			std::vector<XnSkeletonJoint> getActiveJoints() const;
 			bool setJointActive(XnSkeletonJoint joint, bool active=true);
 			bool setProfile(XnSkeletonProfile profile);
@@ -43,7 +40,7 @@ namespace xncv
 			std::vector<User> getUsers();
 	};
 
-	void drawLimbs(const std::vector<xncv::Limb>& limbs, cv::Mat& image, float confidenceThreshold=0.5f);
+	void drawLimbs(cv::Mat& image, const std::vector<xncv::Limb>& limbs, float confidenceThreshold=0.5f, unsigned char color=0);
 	std::vector<xncv::User> filterClosest(const std::vector<xncv::User>& users);
 }
 #endif 

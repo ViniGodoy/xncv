@@ -23,5 +23,6 @@
 #include "exceptions.hpp"
 #include "videosource.hpp"
 #include "usertracker.hpp"
+#include "skeletonio.hpp"
 
 #endif

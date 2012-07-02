@@ -1,5 +1,33 @@
 #include "skeletonio.hpp"
 #include "exceptions.hpp"
+#include "videosource.hpp"
+
+//-----------------------------------------------------------------------------
+//Auxiliary read/write functions
+//-----------------------------------------------------------------------------
+void write(std::fstream& writer, unsigned char value) {	writer.write((char*)&value, sizeof(unsigned char)); }
+void write(std::fstream& writer, unsigned short value) { writer.write((char*)&value, sizeof(unsigned short)); }
+void write(std::fstream& writer, unsigned int value) { writer.write((char*)&value, sizeof(unsigned int)); }
+void write(std::fstream& writer, unsigned long value) { writer.write((char*)&value, sizeof(unsigned long)); }
+void write(std::fstream& writer, bool value) { writer.write((char*)&value, sizeof(bool)); }
+void write(std::fstream& writer, float value) { writer.write((char*)&value, sizeof(float)); }
+void write(std::fstream& writer, double value) { writer.write((char*)&value, sizeof(double)); }
+void write(std::fstream& writer, char value) {	writer.write((char*)&value, sizeof(char)); }
+void write(std::fstream& writer, short value) { writer.write((char*)&value, sizeof(short)); }
+void write(std::fstream& writer, int value) { writer.write((char*)&value, sizeof(int)); }
+void write(std::fstream& writer, long value) { writer.write((char*)&value, sizeof(long)); }
+
+void read(std::fstream& writer, unsigned char &value) {	writer.read((char*)&value, sizeof(unsigned char)); }
+void read(std::fstream& writer, unsigned short &value) { writer.read((char*)&value, sizeof(unsigned short)); }
+void read(std::fstream& writer, unsigned int &value) { writer.read((char*)&value, sizeof(unsigned int)); }
+void read(std::fstream& writer, unsigned long &value) { writer.read((char*)&value, sizeof(unsigned long)); }
+void read(std::fstream& writer, bool &value) { writer.read((char*)&value, sizeof(bool)); }
+void read(std::fstream& writer, float &value) { writer.read((char*)&value, sizeof(float)); }
+void read(std::fstream& writer, double &value) { writer.read((char*)&value, sizeof(double)); }
+void read(std::fstream& writer, char &value) {	writer.read((char*)&value, sizeof(char)); }
+void read(std::fstream& writer, short &value) { writer.read((char*)&value, sizeof(short)); }
+void read(std::fstream& writer, int &value) { writer.read((char*)&value, sizeof(int)); }
+void read(std::fstream& writer, long &value) { writer.read((char*)&value, sizeof(long)); }
 
 //-----------------------------------------------------------------------------
 //User information
@@ -69,7 +97,7 @@ std::vector<xncv::Limb> xncv::UserInformation::getLimbs() const
 //-----------------------------------------------------------------------------
 //Skeleton reader
 //-----------------------------------------------------------------------------
-xncv::SkeletonReader::SkeletonReader()
+xncv::SkeletonReader::SkeletonReader() : frames(0)
 {
 }
 
@@ -78,65 +106,66 @@ void xncv::SkeletonReader::open(const std::string& filename)
 	using namespace std;
 
 	fstream reader;
-	reader.open(filename, fstream::out | fstream::binary);
+	reader.open(filename, fstream::in | fstream::binary);
 
 	unsigned magic;
-	reader >> magic;
+	read(reader, magic);
 	if (magic != MAGIC)
 		throw new xncv::IOException("Invalid file", filename);
 
 	unsigned short version;
-	reader >> version;
+	read(reader, version);
 	if (version > VERSION)
 		throw new xncv::IOException("Version bigger than expected. Please update your xncv library.", filename);
 
 
 	while (!reader.eof())
 	{
-		int frame;
-		reader >> frame;
+		int frame=0;
+		read(reader, frame);
+		if (frame > frames) frames = frame;
 
-		XnUserID userId;
-		reader >> userId;
+		XnUserID userId=0;
+		read(reader, userId);
 		UserInformation userInfo(userId);
 
-		unsigned short jointsSize;
-		reader >> jointsSize;
+		unsigned short jointsSize=0;
+		read(reader, jointsSize);
 		for (int i = 0; i < jointsSize; ++i)
 		{
 			//Joint type
-			unsigned short type;
-			reader >> type;
+			unsigned short type=0;
+			read(reader, type);
 			XnSkeletonJoint jointType = static_cast<XnSkeletonJoint>(type);
 
 			//World position
 			XnSkeletonJointTransformation transform;
-			reader >> transform.position.position.X;
-			reader >> transform.position.position.Y;
-			reader >> transform.position.position.Z;
-			reader >> transform.position.fConfidence;
+			read(reader, transform.position.position.X);
+			read(reader, transform.position.position.Y);
+			read(reader, transform.position.position.Z);
+			read(reader, transform.position.fConfidence);
 
 			//World orientation
 			for (int i = 0; i < 9; ++i)
-				reader >> transform.orientation.orientation.elements[i];
-			reader >> transform.orientation.fConfidence;
+				read(reader, transform.orientation.orientation.elements[i]);
+			read(reader, transform.orientation.fConfidence);
 
 			//Projective position
 			ProjectiveJoint projectiveJoint;
-			reader >> projectiveJoint.position.x;
-			reader >> projectiveJoint.position.y;
+			read(reader, projectiveJoint.position.x);
+			read(reader, projectiveJoint.position.y);
 			projectiveJoint.fConfidence = transform.position.fConfidence;
 
 			userInfo.worldJoints[jointType] = transform;
-			userInfo.projectiveJoints[jointType] = projectiveJoint;
-			users[frame].push_back(userInfo);
+			userInfo.projectiveJoints[jointType] = projectiveJoint;			
 		}
+		users[frame].push_back(userInfo);
 	}
 }
 
 int xncv::SkeletonReader::frameCount() const
 {
-	return users.size();
+	return frames;
 }
 
 const std::vector<xncv::UserInformation>& xncv::SkeletonReader::getUsers(int frame) const
@@ -144,56 +173,61 @@ const std::vector<xncv::UserInformation>& xncv::SkeletonReader::getUsers(int fra
 	if (frame < 0 || frame >= frameCount())
 		return empty;
 
-	return users.at(frame);
+	return users.find(frame) == users.end() ? empty : users.at(frame);
 }
 
 //-----------------------------------------------------------------------------
 //Skeleton writer
 //-----------------------------------------------------------------------------
-xncv::SkeletonWriter::SkeletonWriter(xn::DepthGenerator* generator)
-	: writer(), depthGen(generator), frame(0)
+xncv::SkeletonWriter::SkeletonWriter(xncv::VideoSource& videoSource)
+	: writer(), depthGen(&(videoSource.getXnDepthGenerator())), frame(0)
 {
 	writer.exceptions(std::fstream::failbit | std::fstream::badbit);
 }
 
 void xncv::SkeletonWriter::open(const std::string& fileName)
 {
-	writer.open(fileName, std::fstream::in | std::fstream::trunc | std::fstream::binary);
+	writer.open(fileName, std::fstream::out | std::fstream::trunc | std::fstream::binary);
 	frame = 0;
-	writer << MAGIC;
-	writer << VERSION; //File version
+	write(writer, MAGIC);
+	write(writer, VERSION); //File version
+}
+
+bool xncv::SkeletonWriter::isOpen() const
+{
+	return writer.is_open();
 }
 
 void xncv::SkeletonWriter::operator<<(const User& user)
 {
-	if (!user.isTracking() || user.isCalibrating())
+	if (!isOpen() || !user.isTracking() || user.isCalibrating())
 		return;
 
-	writer << frame;
-	writer << user.getId();
+	write(writer, frame);
+	write (writer, user.getId());
 	auto joints = user.getJoints();
 	unsigned short jointsSize = static_cast<unsigned short>(joints.size());
-	writer << joints.size();
+	write(writer, jointsSize);	
 	for (auto it = joints.cbegin(); it != joints.cend(); ++it)
 	{
 		//Joint type
-		writer << static_cast<unsigned short>(it->first);
+		write(writer, static_cast<unsigned short>(it->first));
 
 		//World position
-		writer << it->second.position.position.X;
-		writer << it->second.position.position.Y;
-		writer << it->second.position.position.Z;
-		writer << it->second.position.fConfidence;
+		write(writer, it->second.position.position.X);
+		write(writer, it->second.position.position.Y);
+		write(writer, it->second.position.position.Z);
+		write(writer, it->second.position.fConfidence);
 
 		//World orientation
 		for (int i = 0; i < 9; ++i)
-			writer << it->second.orientation.orientation.elements[i];
-		writer << it->second.orientation.fConfidence;
+			write(writer, it->second.orientation.orientation.elements[i]);
+		write(writer, it->second.orientation.fConfidence);
 
 		//Projective position
 		cv::Point projectivePos = xncv::worldToProjective(it->second.position.position, *depthGen);
-		writer << projectivePos.x;
-		writer << projectivePos.y;
+		write(writer, projectivePos.x);
+		write(writer, projectivePos.y);
 	}
 }
 
@@ -205,16 +239,19 @@ void xncv::SkeletonWriter::operator<<(const std::vector<User>& users)
 
 void xncv::SkeletonWriter::endFrame()
 {
+	if (!isOpen()) return;
 	++frame;
+	writer.flush();
 }
 
 void xncv::SkeletonWriter::close()
 {
+	if (!isOpen()) return;
+	writer.flush();
 	writer.close();
 }
 
 xncv::SkeletonWriter::~SkeletonWriter()
 {
-	if (writer.is_open())
-		writer.close();
+	close();
 }

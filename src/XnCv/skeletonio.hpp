@@ -20,12 +20,14 @@
 
 namespace xncv
 {
-	const unsigned MAGIC = 0x534B6531;
-	const unsigned short VERSION = 1;
+	class VideoSource;
 
+	const unsigned MAGIC = 0x76436E58;
+	const unsigned short VERSION = 1;
+	
 	struct ProjectiveJoint
 	{		
-		cv::Point2f position;
+		cv::Point position;
 		float fConfidence;
 	};
 
@@ -51,6 +53,7 @@ namespace xncv
 		private:			
 			std::map<int, std::vector<UserInformation> > users;
 			const std::vector<UserInformation> empty;
+			int frames;
 
 		public:
 			SkeletonReader();			
@@ -68,8 +71,9 @@ namespace xncv
 			int frame;
 
 		public:
-			SkeletonWriter(xn::DepthGenerator* generator);
+			SkeletonWriter(VideoSource& generator);
 			void open(const std::string& fileName);
+			bool isOpen() const;
 			inline void beginFrame() {}
 			void operator << (const User& user);
 			void operator << (const std::vector<User>& users);
