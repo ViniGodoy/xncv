@@ -75,7 +75,6 @@ std::vector<xncv::Limb> xncv::UserInformation::getLimbs() const
 		if(joint1It == projectiveJoints.cend())
             continue; // bad joint
 
-
 		auto joint2It = projectiveJoints.find(LIMB_JOINTS[i][1]);
 		if(joint2It == projectiveJoints.cend())
             continue; // bad joint

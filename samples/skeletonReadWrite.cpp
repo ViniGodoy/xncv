@@ -90,7 +90,7 @@ void readSkeleton(int argc, char* argv[])
 	
 	for (int frame = 0; frame < reader.frameCount(); frame++)
 	{		
-		cv::Mat area = cv::Mat(480, 640, cv::DataType<ushort>::type);
+		cv::Mat area = cv::Mat(480, 640, cv::DataType<uchar>::type, cv::Scalar::all(255));
 		auto users = reader.getUsers(frame);
 
 		//Skip frames with no information
